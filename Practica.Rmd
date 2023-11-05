@@ -1,0 +1,127 @@
+---
+title: "Practica programda 1"
+author: "Maria Fernanda MQ"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Práctica programada 1
+
+Instrucciones
+La presente práctica programada deberá resolverse de manera individual utilizando control de versiones (git),
+github y RStudio.
+Cree en github un repositorio llamado shiny_apps. Cree los tiquetes correspondientes para resolver esta
+práctica programada, además recuerde siempre trabajar bajo la rama correspondiente y hacer commit y
+push de manera frecuente. Cuando ya tenga lista su solución, debe hacer una SF para integrar el código en
+main.
+La manera de entregar la tarea será enviando por google classroom el link al repositorio de github donde fue
+resuelta la práctica programada.
+Cree una aplicación interactiva de shiny. La aplicación va a permitir visualizar información sobre datos de
+des(empleo) y género para algunos países de Latinoamérica y el Caribe.Los datos fueron proporcionados en
+el google classroom. Cree la aplicación en un archivo llamado app1.R
+A continuación se da una explicación de las variables que hay en este conjunto de datos:
+Variable Descripción
+pais_region País o región de Latinoamérica y el Caribe
+codigo_pais_region Código del país o región
+anyo Año correspondiente
+empleadoras_mujeres Dentro de la fuerza laboral femenina,
+porcentaje de mujeres que tienen el rol de
+empleadoras. Se considera como “empleador”
+a personas cuya remuneración depende
+directamente de las ganancias derivadas de los
+bienes y servicios que produce y que tiene una
+o más personas empleadas.
+empleadores_hombres Dentro de la fuerza laboral femenina,
+porcentaje de hombres que tienen el rol de
+empleadores. Se considera como “empleador”
+a personas cuya remuneración depende
+directamente de las ganancias derivadas de los
+bienes y servicios que produce y que tiene una
+o más personas empleadas.
+empleo_agricultura_mujeres Dentro de la fuerza laboral femenina,
+porcentaje que trabaja en agricultura
+empleo_agricultura_hombres Dentro de la fuerza laboral masculina,
+porcentaje que trabaja en agricultura
+empleo_industria_mujeres Dentro de la fuerza laboral femenina,
+porcentaje que trabaja en industria
+empleo_industria_hombres Dentro de la fuerza laboral masculina,
+porcentaje que trabaja en industria
+empleo_servicios_mujeres Dentro de la fuerza laboral femenina,
+porcentaje que trabaja en servicios
+1
+
+Variable Descripción
+empleo_servicios_hombres Dentro de la fuerza laboral masculina,
+porcentaje que trabaja en servicios
+empleo_informal_mujeres Porcentaje de mujeres en empleos informales
+
+(no vinculados a la agricultura)
+
+empleo_informal_hombres Porcentaje de hombres en empleos informales
+
+(no vinculados a la agricultura)
+
+legislacion_acoso_sexual Existencia de legislación laboral contra acoso
+
+sexual laboral (1 = sí, 0 = no)
+autoempleo_mujeres Mujeres trabajadoras por cuenta propia.
+Porcentaje dentro del total de la fuerza
+laboral femenina.
+
+autoempleo_hombres Hombres trabajadores por cuenta propia.
+Porcentaje dentro del total de la fuerza
+laboral masculina.
+
+empleo_parcial_mujeres Mujeres con trabajo a tiempo parcial.
+Porcentaje respecto del total de personas con
+trabajo a tiempo parcial.
+
+dese mpleo_educacion_mujeres Mujeres desempleadas con estudios terciarios.
+Porcentaje respecto del total de la fuerza
+laboral femenina con estudios terciarios.
+desempleo_educacion_hombres Hombres desempleados con estudios terciarios.
+Porcentaje respecto del total de la fuerza
+laboral masculina con estudios terciarios.
+desempleo_mujeres Mujeres desempleadas. Porcentaje respecto
+del total de la fuerza laboral femenina.
+desempleo_hombres Hombres desempleados. Porcentaje respecto
+del total de la fuerza laboral masculina.
+trabajo_domestico_no_remunerado_mujeres Porcentaje del día utilizado por mujeres en
+trabajo no remunerado doméstico y de
+cuidado.
+
+trabajo_domestico_no_remunerado_hombres Porcentaje del día utilizado por hombres en
+trabajo no remunerado doméstico y de
+cuidado.
+
+La aplicación puede usar shiny y/o shinydashboard y debe contener :
+• Al menos 3 inputs que permitan que la persona interactúe con la aplicación (pueden ser de cualquier
+tipo).
+• Al menos un botón.
+• Al menos 3 outputs que muestren gráficos, y 1 output que muestre una tabla. Los gráficos de ggplot2
+deben estar correctamente titulados, y mostrar la información de una manera que sea interpretable y
+clara para la persona que ingresa al dashboard.
+
+
+
+
+```{r}
+library(shiny)
+library(shinydashboard)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(gapminder)
+```
+
+
+
+```{r}
+
+desempleo <- read_excel ("~/CURSO DE R 3/TareasR-MFMQ/DATOS/datos_empleo_genero.xlsx")
+glimpse(desempleo)
+```
+```{r}
+
+```
+

@@ -112,6 +112,7 @@ library(dplyr)
 library(readxl)
 library(ggplot2)
 library(gapminder)
+library(tidyr)
 ```
 
 
@@ -121,7 +122,95 @@ library(gapminder)
 desempleo <- read_excel ("~/CURSO DE R 3/TareasR-MFMQ/DATOS/datos_empleo_genero.xlsx")
 glimpse(desempleo)
 ```
+
+
 ```{r}
+library(shiny)
+library(readxl)
+
+
+desempleo <- read_excel("~/CURSO DE R 3/TareasR-MFMQ/DATOS/datos_empleo_genero.xlsx")
+
+desempleo[desempleo == "NO HAY DATOS"] <- 0
+
+
+ui <- fluidPage(
+  titlePanel("Visualización de Datos de Empleo"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("pais", "Seleccionar País:", choices = unique(desempleo$pais_region)),
+      selectInput("anio", "Seleccionar Año:", choices = unique(desempleo$anyo)),
+      checkboxGroupInput("columnas",
+                         "Seleccionar Columnas:",
+                         choices = c("Empleadores", "Agricultura", "Industria", "Servicios", "Informal", "Auto empleo", "Desempleo Educacion", "Desempleo", "Trabajo Domestico No Remunerado"),
+                         selected = c("Empleadores", "Agricultura", "Industria", "Servicios", "Informal", "Auto empleo", "Desempleo Educacion", "Desempleo", "Trabajo Domestico No Remunerado")
+      ),
+      actionButton("generarGraficoTabla", "Generar Gráfico y Tabla")
+    ),
+    mainPanel(
+      plotOutput("grafico"),
+      dataTableOutput("tabla"),
+      textOutput("mensaje")  
+    )
+  )
+)
+
+server <- function(input, output) {
+  data_filtrada <- reactive({
+    filtro_pais <- desempleo$`pais_region` == input$pais
+    filtro_anio <- desempleo$`anyo` == input$anio
+    datos_filtrados <- desempleo[filtro_pais & filtro_anio, ]
+    return(datos_filtrados)
+  })
+
+  observeEvent(input$generarGraficoTabla, {
+    data <- data_filtrada()
+    selected_columns <- unlist(lapply(input$columnas, function(col) {
+      if (col == "Empleadores") {
+        return(c(data$empleadoras_mujeres, data$empleadores_hombres))
+      } else if (col == "Agricultura") {
+        return(c(data$empleo_agricultura_mujeres, data$empleo_agricultura_hombres))
+      } else if (col == "Industria") {
+        return(c(data$empleo_industria_mujeres, data$empleo_industria_hombres))
+      } else if (col == "Servicios") {
+        return(c(data$empleo_servicios_mujeres, data$empleo_servicios_hombres))
+      } else if (col == "Informal") {
+        return(c(data$empleo_informal_mujeres, data$empleo_informal_hombres, data$legislacion_acoso_sexual))
+      } else if (col == "Auto empleo") {
+        return(c(data$autoempleo_mujeres, data$autoempleo_hombres, data$empleo_parcial_mujeres))
+      } else if (col == "Desempleo Educacion") {
+        return(c(data$desempleo_educacion_mujeres, data$desempleo_educacion_hombres))
+      } else if (col == "Desempleo") {
+        return(c(data$desempleo_mujeres, data$desempleo_hombres))
+      } else if (col == "Trabajo Domestico No Remunerado") {
+        return(c(data$trabajo_domestico_no_remunerado_mujeres, data$trabajo_domestico_no_remunerado_hombres))
+      }
+    }))
+    selected_columns[selected_columns == "NA"] <- 0
+    output$grafico <- renderPlot({
+      barplot(selected_columns, beside = TRUE, col = rainbow(length(input$columnas)))
+    
+      title(main = "Mujeres VS Hombres")
+    })
+
+    output$tabla <- renderDataTable({
+      data <- data_filtrada()
+      if ("Informal" %in% input$columnas) {
+        data <- data[-ncol(data)]  
+      }
+      data
+    })
+
+    output$mensaje <- renderText({
+      "Gracias por seleccionar"
+    })
+  })
+}
+
+shinyApp(ui, server)
+
 
 ```
+
+
 

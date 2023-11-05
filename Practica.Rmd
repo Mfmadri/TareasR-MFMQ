@@ -202,7 +202,7 @@ server <- function(input, output) {
     })
 
     output$mensaje <- renderText({
-      "Gracias por seleccionar"
+      "Gracias por seleccionar de paso Hola Profe"
     })
   })
 }

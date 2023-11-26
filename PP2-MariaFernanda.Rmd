@@ -1,0 +1,195 @@
+---
+title: "Practica_programada_2"
+author: "Maria Fernanda Madrigal"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(shinydashboard)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(gapminder)
+library(tidyr)
+
+```
+
+La presente práctica programada deberá resolverse de manera individual utilizando control de versiones (git),
+github y RStudio.
+Cree en github un repositorio para entregar esta tarea. Cree los tiquetes correspondientes para resolver esta
+práctica programada, además recuerde siempre trabajar bajo la rama correspondiente y hacer commit y push
+de manera frecuente. Cuando ya tenga lista su solución, debe hacer una SF para integrar el código en main.
+La manera de entregar la tarea será enviando por google classroom el link al repositorio de github donde fue
+resuelta la práctica programada.
+Objetivos de Aprendizaje:
+• Entender y aplicar conceptos de reactividad en Shiny.
+• Utilizar elementos UI como botones y sliders para interactividad.
+• Implementar la exportación de datos y resultados.
+• Fomentar la comprensión de análisis de datos en un contexto global.
+Descripción: Las estudiantes desarrollarán una aplicación de shiny. La aplicación permitirá a las personas
+usuarias explorar datos sobre libertad humana, libertad personal y libertad económica en diferentes países
+y regiones del mundo, basándose en el conjunto de datos proporcionado (libertad.csv).
+Instrucciones
+Deberá construir un dashboard de shiny que permita a las personas usuarias visualizar información sobre
+países acerca de libertad humana, libertad personal, libertad económica.
+La aplicación deberá permitir a las persona usuarias:
+• Elegir el país para el cual desean visualizar datos de libertad.
+• Elegir el rango de tiempo para el cual desean visualizar los datos de libertad.
+• Elegir si la persona desea visualizar datos de ranking o de puntaje.
+• Permitir a las personas usuarias descargar los datos correspondientes al país y rango de años elegidos.
+El estilo y diseño de la aplicación puede ajustarlos de acuerdo a su creatividad. A continuación se muestra
+una idea básica de cómo podría construirse esta aplicación en shiny.
+
+
+```{r}
+Libertad <- read_excel("DATOS/datos_libertad.xlsx")
+View(Libertad)
+
+glimpse(Libertad)
+```
+```{r}
+# Instalar paquetes si no están instalados
+if (!require("shiny")) install.packages("shiny")
+if (!require("shinydashboard")) install.packages("shinydashboard")
+if (!require("readxl")) install.packages("readxl")
+if (!require("ggplot2")) install.packages("ggplot2")
+
+# Cargar paquetes
+library(shiny)
+library(shinydashboard)
+library(readxl)
+library(ggplot2)
+
+# Cargar datos
+Libertad <- read_excel("DATOS/datos_libertad.xlsx", col_types = c("numeric", "numeric", "text", "text", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
+
+# Convertir libertad_humana_puntaje, libertad_personal_puntaje y libertad_economica_puntaje a numérico
+Libertad$libertad_humana_puntaje <- as.numeric(as.character(Libertad$libertad_humana_puntaje))
+Libertad$libertad_personal_puntaje <- as.numeric(as.character(Libertad$libertad_personal_puntaje))
+Libertad$libertad_economica_puntaje <- as.numeric(as.character(Libertad$libertad_economica_puntaje))
+
+# Definir la interfaz de usuario
+ui <- dashboardPage(
+  dashboardHeader(title = "Libertad Dashboard"),
+  dashboardSidebar(
+    # Agregar el selectInput para elegir el país
+    selectInput("pais_selector", "Seleccionar País", choices = unique(Libertad$pais), selected = NULL),
+    
+    # Agregar radioButtons para elegir entre puntaje y ranking
+    radioButtons("tipo_datos", "Seleccionar Tipo de Datos:",
+                 choices = c("Puntaje" = "puntaje", "Ranking" = "ranking"),
+                 selected = "puntaje"),
+    
+    # Agregar sliderInput para seleccionar el rango de años
+    sliderInput("rango_anios", "Seleccionar Rango de Años:",
+                min = min(Libertad$anio), max = max(Libertad$anio),
+                value = c(min(Libertad$anio), max(Libertad$anio)),
+                step = 1),
+    
+    # Agregar botón para descargar datos
+    downloadButton("descargar_datos", "Descargar Datos")
+  ),
+  dashboardBody(
+    tabBox(
+      title = "Libertad",
+      id = "tabset1",
+      tabPanel("Libertad Personal", plotOutput("personal_plot")),
+      tabPanel("Libertad Humana", plotOutput("humana_plot")),
+      tabPanel("Libertad Económica", plotOutput("economica_plot"))
+    ),
+    
+    # Agregar botón para descargar gráficos
+    downloadButton("descargar_graficos", "Descargar Gráficos")
+  )
+)
+
+# Definir el servidor
+server <- function(input, output) {
+  # Funciones para generar gráficos
+  output$personal_plot <- renderPlot({
+    # Filtrar datos por el país seleccionado y el rango de años
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    
+    # Seleccionar columna adecuada según el tipo de datos elegido
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_personal_puntaje", "libertad_personal_ranking")
+    
+    # Gráfico de líneas para Libertad Personal a lo largo del tiempo
+    plot(data$anio, data[[columna]], type = 'l',
+         main = paste("Libertad Personal para", input$pais_selector, "a lo largo del tiempo"),
+         xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
+
+  output$humana_plot <- renderPlot({
+    # Filtrar datos por el país seleccionado y el rango de años
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    
+    # Seleccionar columna adecuada según el tipo de datos elegido
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_humana_puntaje", "libertad_humana_ranking")
+    
+    # Gráfico de líneas para Libertad Humana a lo largo del tiempo
+    plot(data$anio, data[[columna]], type = 'l',
+         main = paste("Libertad Humana para", input$pais_selector, "a lo largo del tiempo"),
+         xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
+
+  output$economica_plot <- renderPlot({
+    # Filtrar datos por el país seleccionado y el rango de años
+    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    
+    # Seleccionar columna adecuada según el tipo de datos elegido
+    columna <- ifelse(input$tipo_datos == "puntaje", "libertad_economica_puntaje", "libertad_economica_ranking")
+    
+    # Gráfico de líneas para Libertad Económica a lo largo del tiempo
+    plot(data$anio, data[[columna]], type = 'l',
+         main = paste("Libertad Económica para", input$pais_selector, "a lo largo del tiempo"),
+         xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
+  })
+
+  # Función para descargar datos
+  output$descargar_datos <- downloadHandler(
+    filename = function() {
+      paste("datos_filtrados_", input$pais_selector, "_", input$tipo_datos, "_", input$rango_anios[1], "_", input$rango_anios[2], ".csv", sep = "")
+    },
+    content = function(file) {
+      # Filtrar datos por el país seleccionado y el rango de años
+      data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+      write.csv(data, file, row.names = FALSE)
+    }
+  )
+
+  # Función para descargar gráficos
+  output$descargar_graficos <- downloadHandler(
+    filename = function() {
+      paste("graficos_", input$pais_selector, "_", input$tipo_datos, "_", input$rango_anios[1], "_", input$rango_anios[2], ".zip", sep = "")
+    },
+    content = function(file) {
+      # Crear gráficos y guardarlos en un archivo ZIP
+      png("personal_plot.png")
+      print(output$personal_plot)
+      dev.off()
+
+      png("humana_plot.png")
+      print(output$humana_plot)
+      dev.off()
+
+      png("economica_plot.png")
+      print(output$economica_plot)
+      dev.off()
+
+      # Comprimir los archivos PNG en un archivo ZIP
+      zip(file, c("personal_plot.png", "humana_plot.png", "economica_plot.png"))
+    }
+  )
+}
+
+# Ejecutar la aplicación
+shinyApp(ui, server)
+
+
+```
+
+
+

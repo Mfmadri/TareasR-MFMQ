@@ -51,122 +51,124 @@ View(Libertad)
 glimpse(Libertad)
 ```
 ```{r}
-# Instalar paquetes si no están instalados
-if (!require("shiny")) install.packages("shiny")
-if (!require("shinydashboard")) install.packages("shinydashboard")
-if (!require("readxl")) install.packages("readxl")
-if (!require("ggplot2")) install.packages("ggplot2")
-
-# Cargar paquetes
 library(shiny)
 library(shinydashboard)
 library(readxl)
 library(ggplot2)
 
-# Cargar datos
+
 Libertad <- read_excel("DATOS/datos_libertad.xlsx", col_types = c("numeric", "numeric", "text", "text", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-# Convertir libertad_humana_puntaje, libertad_personal_puntaje y libertad_economica_puntaje a numérico
+
 Libertad$libertad_humana_puntaje <- as.numeric(as.character(Libertad$libertad_humana_puntaje))
 Libertad$libertad_personal_puntaje <- as.numeric(as.character(Libertad$libertad_personal_puntaje))
 Libertad$libertad_economica_puntaje <- as.numeric(as.character(Libertad$libertad_economica_puntaje))
 
-# Definir la interfaz de usuario
+
 ui <- dashboardPage(
   dashboardHeader(title = "Libertad Dashboard"),
   dashboardSidebar(
-    # Agregar el selectInput para elegir el país
-    selectInput("pais_selector", "Seleccionar País", choices = unique(Libertad$pais), selected = NULL),
+   
+    selectInput("region_selector", "Seleccionar Región", choices = unique(Libertad$region), selected = NULL),
     
-    # Agregar radioButtons para elegir entre puntaje y ranking
+    
+    selectInput("pais_selector", "Seleccionar País", choices = character(0), selected = NULL),
+    
+    
     radioButtons("tipo_datos", "Seleccionar Tipo de Datos:",
                  choices = c("Puntaje" = "puntaje", "Ranking" = "ranking"),
                  selected = "puntaje"),
     
-    # Agregar sliderInput para seleccionar el rango de años
+    
     sliderInput("rango_anios", "Seleccionar Rango de Años:",
                 min = min(Libertad$anio), max = max(Libertad$anio),
                 value = c(min(Libertad$anio), max(Libertad$anio)),
                 step = 1),
     
-    # Agregar botón para descargar datos
+   
     downloadButton("descargar_datos", "Descargar Datos")
   ),
   dashboardBody(
     tabBox(
-      title = "Libertad",
+      title = "Desarrollo de la Libertad a través de los años",
       id = "tabset1",
       tabPanel("Libertad Personal", plotOutput("personal_plot")),
       tabPanel("Libertad Humana", plotOutput("humana_plot")),
       tabPanel("Libertad Económica", plotOutput("economica_plot"))
     ),
     
-    # Agregar botón para descargar gráficos
-    downloadButton("descargar_graficos", "Descargar Gráficos")
+   
+    downloadButton("descargar_graficos", "Descargar Gráfico")
   )
 )
 
-# Definir el servidor
-server <- function(input, output) {
-  # Funciones para generar gráficos
+
+server <- function(input, output, session) {
+  
+  
+  observeEvent(input$region_selector, {
+    updateSelectInput(session, "pais_selector", choices = unique(Libertad$pais[Libertad$region == input$region_selector]))
+  })
+
+ 
   output$personal_plot <- renderPlot({
-    # Filtrar datos por el país seleccionado y el rango de años
-    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
     
-    # Seleccionar columna adecuada según el tipo de datos elegido
+    data <- subset(Libertad, region == input$region_selector & pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    
+   
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_personal_puntaje", "libertad_personal_ranking")
     
-    # Gráfico de líneas para Libertad Personal a lo largo del tiempo
+   
     plot(data$anio, data[[columna]], type = 'l',
-         main = paste("Libertad Personal para", input$pais_selector, "a lo largo del tiempo"),
+         main = paste("Libertad Personal para", input$pais_selector, "en la región", input$region_selector, "a lo largo del tiempo"),
          xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
 
   output$humana_plot <- renderPlot({
-    # Filtrar datos por el país seleccionado y el rango de años
-    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+ 
+    data <- subset(Libertad, region == input$region_selector & pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
     
-    # Seleccionar columna adecuada según el tipo de datos elegido
+    
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_humana_puntaje", "libertad_humana_ranking")
     
-    # Gráfico de líneas para Libertad Humana a lo largo del tiempo
+    
     plot(data$anio, data[[columna]], type = 'l',
-         main = paste("Libertad Humana para", input$pais_selector, "a lo largo del tiempo"),
+         main = paste("Libertad Humana para", input$pais_selector, "en la región", input$region_selector, "a lo largo del tiempo"),
          xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
 
   output$economica_plot <- renderPlot({
-    # Filtrar datos por el país seleccionado y el rango de años
-    data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
     
-    # Seleccionar columna adecuada según el tipo de datos elegido
+    data <- subset(Libertad, region == input$region_selector & pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+    
+   
     columna <- ifelse(input$tipo_datos == "puntaje", "libertad_economica_puntaje", "libertad_economica_ranking")
     
-    # Gráfico de líneas para Libertad Económica a lo largo del tiempo
+ 
     plot(data$anio, data[[columna]], type = 'l',
-         main = paste("Libertad Económica para", input$pais_selector, "a lo largo del tiempo"),
+         main = paste("Libertad Económica para", input$pais_selector, "en la región", input$region_selector, "a lo largo del tiempo"),
          xlab = "Año", ylab = ifelse(input$tipo_datos == "puntaje", "Puntaje", "Ranking"))
   })
 
-  # Función para descargar datos
+  
   output$descargar_datos <- downloadHandler(
     filename = function() {
       paste("datos_filtrados_", input$pais_selector, "_", input$tipo_datos, "_", input$rango_anios[1], "_", input$rango_anios[2], ".csv", sep = "")
     },
     content = function(file) {
-      # Filtrar datos por el país seleccionado y el rango de años
-      data <- subset(Libertad, pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
+      
+      data <- subset(Libertad, region == input$region_selector & pais == input$pais_selector & between(anio, input$rango_anios[1], input$rango_anios[2]))
       write.csv(data, file, row.names = FALSE)
     }
   )
 
-  # Función para descargar gráficos
+
   output$descargar_graficos <- downloadHandler(
     filename = function() {
       paste("graficos_", input$pais_selector, "_", input$tipo_datos, "_", input$rango_anios[1], "_", input$rango_anios[2], ".zip", sep = "")
     },
     content = function(file) {
-      # Crear gráficos y guardarlos en un archivo ZIP
+      
       png("personal_plot.png")
       print(output$personal_plot)
       dev.off()
@@ -179,17 +181,18 @@ server <- function(input, output) {
       print(output$economica_plot)
       dev.off()
 
-      # Comprimir los archivos PNG en un archivo ZIP
+     
       zip(file, c("personal_plot.png", "humana_plot.png", "economica_plot.png"))
     }
   )
 }
 
-# Ejecutar la aplicación
+
 shinyApp(ui, server)
 
-
 ```
+
+
 
 
 

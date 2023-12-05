@@ -34,13 +34,7 @@ una idea básica de cómo podría construirse esta aplicación en shiny.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(shiny)
-library(shinydashboard)
-library(dplyr)
-library(readxl)
-library(ggplot2)
-library(gapminder)
-library(tidyr)
+
 ```
 
 

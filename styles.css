@@ -33,5 +33,12 @@ body {
   border-radius: 8px; /* Bordes redondeados */
   overflow: hidden; /* Evita que el mapa se desborde de su contenedor */
 }
+/* styles.css */
+.custom-analisis-final-text {
+  font-family: 'Century Gothic', sans-serif;
+  font-size: 16px; /* Adjust the font size as needed */
+  line-height: 1.6; /* Adjust the line height as needed */
+  /* Add any other styling properties as needed */
+}
 
 /* Agrega estilos específicos para otros elementos según sea necesario */

@@ -1,0 +1,37 @@
+/* styles.css */
+.skin-black .main-header,
+.skin-black .main-sidebar {
+  background-color: #7a3cb7; /* Morado oscuro para el fondo del header y del sidebar */
+}
+
+/* Resto del código CSS existente */
+body {
+  font-family: 'Century Gothic', sans-serif;
+  background-color: #f0e5ff; /* Morado claro para el fondo general */
+}
+
+.box {
+  border: 1px solid #b38cff; /* Borde de las cajas */
+  border-radius: 8px; /* Bordes redondeados */
+  background-color: #e6ccff; /* Morado claro para el fondo de las cajas */
+  margin-bottom: 15px; /* Margen inferior entre las cajas */
+}
+
+.box-title {
+  background-color: #7a3cb7; /* Morado oscuro para el fondo del título de las cajas */
+  color: #fff; /* Texto blanco para el título de las cajas */
+  border-radius: 8px 8px 0 0; /* Bordes redondeados solo en la parte superior */
+  padding: 8px; /* Espaciado interno del título */
+}
+
+.plotly-graph {
+  margin-bottom: 0; /* Elimina el margen inferior de los gráficos Plotly */
+}
+
+.leaflet-container {
+  border: 1px solid #b38cff; /* Borde del mapa Leaflet */
+  border-radius: 8px; /* Bordes redondeados */
+  overflow: hidden; /* Evita que el mapa se desborde de su contenedor */
+}
+
+/* Agrega estilos específicos para otros elementos según sea necesario */
